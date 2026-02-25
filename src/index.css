@@ -1,15 +1,5 @@
 @import "tailwindcss";
 
-@keyframes shimmer {
-  100% {
-    transform: translateX(200%);
-  }
-}
-
-:root {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-}
-
 html, body, #root {
   height: 100%;
 }

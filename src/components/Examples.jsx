@@ -10,13 +10,13 @@ export default function Examples({ onPickExample, disabled }) {
       <h3 className="text-center text-xl font-semibold">Try some examples</h3>
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         {ex.map((t, i) => (
-          <div key={i} className="rounded-2xl border bg-white p-5 shadow-sm">
+          <div key={i} className="rounded-2xl border border-white/10 bg-slate-950/40 p-5 shadow-sm">
             <div className="text-sm opacity-80">{t}</div>
             <div className="mt-4">
               <button
                 disabled={disabled}
                 onClick={() => onPickExample?.(t)}
-                className="rounded-full bg-violet-600 px-5 py-2 text-sm font-semibold text-white hover:bg-violet-700"
+                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                     >
                 Try this example
               </button>

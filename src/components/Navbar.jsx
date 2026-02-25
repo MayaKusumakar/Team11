@@ -1,13 +1,13 @@
 export default function Navbar() {
   return (
-    <div className="sticky top-0 z-50 border-b bg-white/70 backdrop-blur">
+    <div className="sticky top-0 z-50 border-white/10-b bg-slate-950/40 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2 font-semibold">
         <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="h-6 w-6 text-violet-600"
+            className="h-6 w-6 text-blue-600"
         >
             <path d="M12 2L4 5v6c0 5 3.8 9.7 8 11 4.2-1.3 8-6 8-11V5l-8-3zm-1 13l-3-3 1.4-1.4L11 12.2l4.6-4.6L17 9l-6 6z"/>
         </svg>
@@ -18,7 +18,7 @@ export default function Navbar() {
           <a href="#model" className="hover:opacity-100">Model</a>
           <a href="#about" className="hover:opacity-100">About</a>
           <a
-            href="https://github.com/your-username/reviewcheck-frontend"
+            href="https://github.com/MayaKusumakar/Team11"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 hover:opacity-100"

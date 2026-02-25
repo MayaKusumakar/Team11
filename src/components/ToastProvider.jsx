@@ -5,13 +5,13 @@ const ToastCtx = createContext(null);
 function Toast({ toast, onClose }) {
   const tone =
     toast.type === "error"
-      ? "border-red-200 bg-red-50 text-red-800"
+      ? "border-white/10-white/10-white/10-white/10-white/10-white/10-red-200 bg-red-50 text-red-800"
       : toast.type === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-      : "border-black/10 bg-white text-black";
+      ? "border-white/10-white/10-white/10-white/10-white/10-white/10-emerald-200 bg-emerald-50 text-emerald-800"
+      : "border-white/10-white/10-white/10-white/10-white/10-white/10-black/10 bg-slate-950/40 text-black";
 
   return (
-    <div className={`w-[340px] rounded-2xl border p-4 shadow-sm ${tone}`}>
+    <div className={`w-[340px] rounded-2xl border-white/10-white/10-white/10-white/10-white/10-white/10 p-4 shadow-sm ${tone}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
           {toast.title && <div className="text-sm font-semibold">{toast.title}</div>}

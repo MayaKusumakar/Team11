@@ -23,9 +23,9 @@ function Badge({ label, confidence }) {
       <div className="mt-1 text-sm opacity-90">
         {Math.round((confidence ?? 0) * 100)}% Confident
       </div>
-      <div className="mt-3 h-2 w-full rounded-full bg-white/30">
+      <div className="mt-3 h-2 w-full rounded-full bg-slate-950/40/30">
         <div
-          className="h-2 rounded-full bg-white/70"
+          className="h-2 rounded-full bg-slate-950/40/70"
           style={{ width: `${Math.round((confidence ?? 0) * 100)}%` }}
         />
       </div>
@@ -36,7 +36,7 @@ function Badge({ label, confidence }) {
 function SignalChip({ name, direction }) {
   const arrow = direction === "up" ? "↑" : direction === "down" ? "↓" : "•";
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs">
+    <span className="inline-flex items-center gap-2 rounded-full border-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10 bg-slate-950/40 px-3 py-1 text-xs">
       <span className="opacity-80">{name}</span>
       <span className="font-semibold">{arrow}</span>
     </span>
@@ -46,7 +46,7 @@ function SignalChip({ name, direction }) {
 export default function ResultPanel({ result, loading, error }) {
   if (loading) {
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10 bg-slate-950/40 p-6 shadow-sm">
       <Shimmer className="h-6 w-44" />
       <div className="mt-4 space-y-3">
         <Shimmer className="h-20 w-full" />
@@ -63,7 +63,7 @@ export default function ResultPanel({ result, loading, error }) {
 
   if (error) {
     return (
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10 bg-slate-950/40 p-6 shadow-sm">
         <div className="font-semibold text-red-600">Something went wrong</div>
         <div className="mt-2 text-sm opacity-70">{error}</div>
       </div>
@@ -72,7 +72,7 @@ export default function ResultPanel({ result, loading, error }) {
 
   if (!result) {
     return (
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10 bg-slate-950/40 p-6 shadow-sm">
         <div className="text-sm opacity-70">
           Your result will appear here after you analyze a review.
         </div>
@@ -81,7 +81,7 @@ export default function ResultPanel({ result, loading, error }) {
   }
 
   return (
-    <div className="rounded-2xl border bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10-white/10 bg-slate-950/40 p-4 shadow-sm">
       <Badge label={result.label} confidence={result.confidence} />
 
       <div className="mt-4">
