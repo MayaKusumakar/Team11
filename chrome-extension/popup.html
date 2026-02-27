@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FakeReview Detector</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 280px;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #212529;
+      background: #fff;
+    }
+
+    header {
+      background: #232f3e;
+      color: #fff;
+      padding: 10px 14px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    section {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .label {
+      font-size: 11px;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    /* Status row */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #adb5bd;
+      flex-shrink: 0;
+    }
+    .dot.green  { background: #198754; }
+    .dot.red    { background: #dc3545; }
+    .dot.yellow { background: #ffc107; }
+
+    /* Summary grid */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .summary-cell {
+      background: #f8f9fa;
+      border-radius: 4px;
+      padding: 6px 4px;
+      text-align: center;
+    }
+
+    .summary-cell .num {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .summary-cell .lbl {
+      font-size: 10px;
+      color: #6c757d;
+      margin-top: 1px;
+    }
+
+    .num.fake      { color: #dc3545; }
+    .num.real      { color: #198754; }
+    .num.uncertain { color: #e6a800; }
+
+    /* Notice */
+    .notice {
+      font-size: 12px;
+      color: #6c757d;
+      text-align: center;
+      padding: 14px;
+    }
+
+    /* API URL input */
+    .input-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      border: 1px solid #ced4da;
+      border-radius: 3px;
+      padding: 4px 6px;
+      font-size: 12px;
+      font-family: monospace;
+      outline: none;
+    }
+
+    input[type="text"]:focus { border-color: #86b7fe; }
+
+    button {
+      background: #232f3e;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button:hover { background: #131921; }
+
+    .save-msg {
+      font-size: 11px;
+      color: #198754;
+      margin-top: 4px;
+      min-height: 14px;
+    }
+
+    footer {
+      padding: 6px 14px;
+      font-size: 10px;
+      color: #adb5bd;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>🔍 FakeReview Detector</header>
+
+  <!-- Scan button -->
+  <section>
+    <button id="scan-btn" style="width:100%;padding:7px;font-size:13px;">
+      🔍 Scan This Page
+    </button>
+    <div class="save-msg" id="scan-msg"></div>
+  </section>
+
+  <!-- API Status -->
+  <section>
+    <div class="label">API Status</div>
+    <div class="status-row">
+      <div class="dot" id="status-dot"></div>
+      <span id="status-text">Checking…</span>
+    </div>
+  </section>
+
+  <!-- Page Summary -->
+  <section id="summary-section">
+    <div class="label">This Page</div>
+    <div id="summary-content">
+      <div class="notice">No analysis data yet.<br>Navigate to an Amazon review page.</div>
+    </div>
+  </section>
+
+  <!-- Model selector -->
+  <section>
+    <div class="label">Model</div>
+    <select id="model-select" style="width:100%;padding:4px 6px;font-size:12px;border:1px solid #ced4da;border-radius:3px;margin-top:4px;">
+      <option value="lstm">BiLSTM (default)</option>
+    </select>
+    <div style="font-size:10px;color:#6c757d;margin-top:3px;" id="model-desc"></div>
+  </section>
+
+  <!-- API URL Config -->
+  <section>
+    <div class="label">API URL</div>
+    <div class="input-row">
+      <input type="text" id="api-url-input" placeholder="https://your-api-url" />
+      <button id="save-btn">Save</button>
+    </div>
+    <div class="save-msg" id="save-msg"></div>
+  </section>
+
+  <footer>Powered by LSTM · Manifest V3</footer>
+
+  <script>
+    const DEFAULT_API_URL = "https://fakereview-api-d72r.onrender.com";
+
+    const dotEl      = document.getElementById("status-dot");
+    const textEl     = document.getElementById("status-text");
+    const urlInput   = document.getElementById("api-url-input");
+    const saveBtn    = document.getElementById("save-btn");
+    const saveMsg    = document.getElementById("save-msg");
+    const summaryEl  = document.getElementById("summary-content");
+    const scanBtn    = document.getElementById("scan-btn");
+    const scanMsg    = document.getElementById("scan-msg");
+
+    // ── Scan button ───────────────────────────────────────────────────────────
+    scanBtn.addEventListener("click", () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+        if (!tab) return;
+
+        const isAmazon = tab.url && tab.url.includes("amazon.com");
+        if (!isAmazon) {
+          scanMsg.style.color = "#dc3545";
+          scanMsg.textContent = "Not an Amazon page.";
+          setTimeout(() => (scanMsg.textContent = ""), 2000);
+          return;
+        }
+
+        chrome.tabs.sendMessage(tab.id, { action: "scan" }, () => {
+          scanMsg.style.color = "#198754";
+          scanMsg.textContent = "Scanning…";
+          setTimeout(() => (scanMsg.textContent = ""), 2000);
+        });
+      });
+    });
+
+    const modelSelect = document.getElementById("model-select");
+    const modelDesc   = document.getElementById("model-desc");
+
+    // ── Load saved settings ──────────────────────────────────────────────────
+    chrome.storage.sync.get({ apiUrl: DEFAULT_API_URL, modelId: "lstm" }, ({ apiUrl, modelId }) => {
+      urlInput.value = apiUrl;
+      pingHealth(apiUrl);
+      loadModels(apiUrl, modelId);
+    });
+
+    // ── Model selector change ────────────────────────────────────────────────
+    modelSelect.addEventListener("change", () => {
+      chrome.storage.sync.set({ modelId: modelSelect.value });
+    });
+
+    // ── Fetch available models from API ──────────────────────────────────────
+    async function loadModels(apiUrl, savedModelId) {
+      try {
+        const res   = await fetch(`${apiUrl}/models`, { signal: AbortSignal.timeout(5000) });
+        const models = await res.json();
+
+        // Rebuild options from API response
+        modelSelect.innerHTML = "";
+        models.forEach(({ id, label, description }) => {
+          const opt = document.createElement("option");
+          opt.value       = id;
+          opt.textContent = label;
+          if (id === savedModelId) opt.selected = true;
+          modelSelect.appendChild(opt);
+        });
+
+        // Show description for selected model
+        const selected = models.find(m => m.id === modelSelect.value);
+        if (selected) modelDesc.textContent = selected.description;
+
+        modelSelect.addEventListener("change", () => {
+          const sel = models.find(m => m.id === modelSelect.value);
+          if (sel) modelDesc.textContent = sel.description;
+        });
+
+      } catch {
+        // API offline or old version — leave the default option
+      }
+    }
+
+    // ── Save button ──────────────────────────────────────────────────────────
+    saveBtn.addEventListener("click", () => {
+      const url = urlInput.value.trim().replace(/\/$/, "");
+      if (!url) return;
+
+      chrome.storage.sync.set({ apiUrl: url }, () => {
+        saveMsg.textContent = "Saved!";
+        setTimeout(() => (saveMsg.textContent = ""), 2000);
+        pingHealth(url);
+      });
+    });
+
+    // ── Ping /health ─────────────────────────────────────────────────────────
+    async function pingHealth(apiUrl) {
+      dotEl.className = "dot yellow";
+      textEl.textContent = "Connecting…";
+
+      try {
+        const res = await fetch(`${apiUrl}/health`, { signal: AbortSignal.timeout(5000) });
+        if (res.ok) {
+          dotEl.className = "dot green";
+          textEl.textContent = "Connected";
+        } else {
+          throw new Error(`HTTP ${res.status}`);
+        }
+      } catch (err) {
+        dotEl.className = "dot red";
+        textEl.textContent = `Offline (${err.message})`;
+      }
+    }
+
+    // ── Load analysis summary from storage ───────────────────────────────────
+    // content.js caches results keyed by Amazon review ID.
+    // We iterate storage to tally results for the current tab's URL.
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (!tab || !tab.url || !tab.url.includes("amazon.com")) return;
+
+      chrome.storage.local.get(null, (all) => {
+        const entries = Object.values(all).filter(
+          (v) => v && typeof v.label === "string"
+        );
+
+        if (entries.length === 0) return;
+
+        const total     = entries.length;
+        const fake      = entries.filter((e) => e.label === "Fake").length;
+        const real      = entries.filter((e) => e.label === "Real").length;
+        const uncertain = entries.filter((e) => e.label === "Uncertain").length;
+
+        summaryEl.innerHTML = `
+          <div class="summary-grid">
+            <div class="summary-cell">
+              <div class="num real">${real}</div>
+              <div class="lbl">Real</div>
+            </div>
+            <div class="summary-cell">
+              <div class="num fake">${fake}</div>
+              <div class="lbl">Fake</div>
+            </div>
+            <div class="summary-cell">
+              <div class="num uncertain">${uncertain}</div>
+              <div class="lbl">Uncertain</div>
+            </div>
+          </div>
+          <div style="margin-top:6px;font-size:11px;color:#6c757d;">
+            ${total} total cached reviews
+          </div>`;
+      });
+    });
+  </script>
+</body>
+</html>

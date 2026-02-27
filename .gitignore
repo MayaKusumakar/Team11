@@ -1,0 +1,5 @@
+api/model.h5
+api/tokenizer.pkl
+api/scaler.pkl
+__pycache__/
+*.pyc
